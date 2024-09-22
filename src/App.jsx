@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import CookieCounter from "./components/CookieCounter";
+import CookieButton from "./components/CookieButton";
+import UpgradeButton from "./components/UpgradeButton";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  // State for the number of cookies
+  const [cookies, setCookies] = useState(0);
+  // State for cookies per second
+  const [cps, setCps] = useState(0);
+  // State for upgrade cost
+  const [upgradeCost, setUpgradeCost] = useState(10);
+
+  // Effect to update the number of cookies every second based on CPS
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCookies((prevCookies) => prevCookies + cps);
+    }, 1000);
+    return () => clearInterval(interval); // Clean up the interval on component unmount
+  }, [cps]); // Re-run effect only when cps changes
+
+  // Function for buying an upgrade
+  function buyUpgrade() {
+    if (cookies >= upgradeCost) {
+      setCookies(cookies - upgradeCost); // Deduct the cost of the upgrade
+      setCps(cps + 1); // Increase the cookies per second
+      setUpgradeCost(Math.floor(upgradeCost * 1.15)); // Increase the upgrade cost
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <CookieCounter cookies={cookies} />
+      <CookieButton
+        onClick={() => {
+          setCookies(cookies + 1);
+        }}
+        buttonText={"Click me for Cookies!"}
+      />
+      <UpgradeButton
+        upgradeCost={upgradeCost}
+        onClick={buyUpgrade}
+        disabled={cookies < upgradeCost}
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;
